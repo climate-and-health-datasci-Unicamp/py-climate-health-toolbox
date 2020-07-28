@@ -1,11 +1,12 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan 21 21:52:54 2020
+Created on Mon Jul 20 22:16:11 2020
 
 @author: Daniela Souza de Oliveira
 
 Module to compute Heat Waves and Cold Waves
-This algorithm receives a climatic normal and a database in order to calculate Heat Waves and Cold Waves
+This algorithm receives a climatic normal and a database in order to calculate Heat Waves and Cold Waves 
 using the method of Geirinhas et al.
 
 """
@@ -13,12 +14,14 @@ import pandas as pd
 import numpy as np
 import datetime
 import more_itertools as mit
+
+import matplotlib.pyplot as plt
 from datetime import timedelta
 from calendar import isleap
     
 #-------------------------------------------------------------------------------
-## Function to add missing dates in a dataframe 
-## This is done in order to fill the dates of all years contained in the dataframe
+## Function to add missing dates in a dataframe. This is done in order to fill
+## the dates of all years contained in the dataframe
 ##
 ## :param      df:   Dataframe containing the database
 ## :type       df:   pandas.DataFrame
@@ -43,14 +46,12 @@ def complete_df(df):
     return df # returns complete df
 
 #-------------------------------------------------------------------------------
-## Function that removes leap day out of the dataframe 
-## IF df contains only the column 'DATE', it removes the day 29-02 
-## IF df contains also the column 'DAY365', this function also updates this column by decrementing 1 for dates
-## after leap day
+## Function that removes leap day out of the dataframe. It removes the day 29-02
+## and also updates this column by decrementing 1 for dates after leap day
 ##
-## :param      df:             Dataframe containing climatic normal/database
-##                             with column 'DATE' and, optionally, also the column 'DAY365'
-## :type       df:             pandas.DataFrame
+## :param      df:   Dataframe containing climatic normal/database with column
+##                   'DATE' and, optionally, also the column 'DAY365'
+## :type       df:   pandas.DataFrame
 ##
 ## :returns:   df with leap day removed
 ## :rtype:     pandas.DataFrame
@@ -97,13 +98,14 @@ def date_toDay365(df):
 ##
 def day365_toDate(day365, year):
     new_date = datetime.date(year, 1, 1) + datetime.timedelta(day365-1)
-           
+              
     return new_date
 
 #-------------------------------------------------------------------------------
-## Function that calculates the percentile of a certain column from the climatic normal dataframe 
-## The percentile is calculated for each day of the year, for all years in the dataframe, 
-## considering a window of a certain size centered on the day in question
+## Function that calculates the percentile of a certain column from the climatic
+## normal dataframe. The percentile is calculated for each day of the year, for
+## all years in the dataframe, considering a window of a certain size centered
+## on the day in question
 ##
 ## :type       climatic_normal:   pandas.DataFrame
 ## :param      climatic_normal:   The climatic normal with 'DATE', pct_column
@@ -146,10 +148,10 @@ def get_percentile(climatic_normal,day365_index,pct_column,percentile_value,wind
 ## This function checks if the values from a column of the database are above
 ## the values of the percentiles dataframe obtained from the get_percentile
 ## function, if a value is above the pct, the column 'above_pct' receives 1 and
-## 0 otherwise 
-## It checks if the maximum temperature is above the Tmax percentile (column 'CTX_pct') 
-## and the mininum temperaturature is above the Tmin percentile (column 'CTN_pct') 
-## CTX90pct and CTN90pct were chosen in this code (90th percentile)
+## 0 otherwise. It checks if the maximum temperature is above the Tmax percentile
+## (column 'CTX_pct') and the mininum temperaturature is above the Tmin
+## percentile (column 'CTN_pct') CTX90pct and CTN90pct were chosen in this code
+## (90th percentile)
 ##
 ## :param      database:      The database with 'DATE','db_column' and 'DAY365'
 ##                            column (in case it doesn't have this column, check
@@ -169,10 +171,14 @@ def get_percentile(climatic_normal,day365_index,pct_column,percentile_value,wind
 ##
 def get_abovePct(database,df_pct,db_columnMAX,db_columnMIN):
     df_aux=pd.DataFrame()
-    database=database.set_index(['DAY365']) #set 'DAY365' column as the index
+    database.set_index(['DAY365'],inplace=True) #set 'DAY365' column as the index
+
     for year in database.DATE.dt.year.unique(): #for every year in the database
         df_year = database[database.DATE.dt.year == year]
-        df_year['above_pct'] = np.where(((df_year[db_columnMAX] >= df_pct['CTX90pct']) & (df_year[db_columnMIN] >= df_pct['CTN90pct'])), 1, 0) #checks if the value in db_column is equal or higher than the corresponding percentile
+        df_year.loc[:,'above_pct'] = 0
+        mask_hw = (df_year[db_columnMAX] >= df_pct['CTX90pct']) & (df_year[db_columnMIN] >= df_pct['CTN90pct'])
+        df_year.loc[mask_hw,'above_pct'] = 1 
+        #checks if the value in db_column is equal or higher than the corresponding percentile
         #column 'above_pct' receives 1 if the condition is satisfied otherwise it receives 0
         if df_aux is None: #if df_aux is empty
             df_aux = df_year #df_aux receives df_year
@@ -187,10 +193,10 @@ def get_abovePct(database,df_pct,db_columnMAX,db_columnMIN):
 ## This function checks if the values from a column of the database are below
 ## the values of the percentiles dataframe obtained from the get_percentile
 ## function, if a value is below the pct, the column 'below_pct' receives 1 and
-## 0 otherwise
-## It checks if the maximum temperature is below the Tmax percentile (CTX_pct) 
-## and the mininum temperaturature is below the Tmin percentile (CTN_pct) 
-## CTX10pct and CTN10pct were chosen in this code (10th percentile)
+## 0 otherwise. It checks if the maximum temperature is below the Tmax
+## percentile (CTX_pct) and the mininum temperaturature is below the Tmin
+## percentile (CTN_pct) CTX10pct and CTN10pct were chosen in this code (10th
+## percentile)
 ##
 ## :param      database:      The database with 'DATE','db_column' and 'DAY365'
 ##                            column (in case it doesn't have this column, check
@@ -198,26 +204,32 @@ def get_abovePct(database,df_pct,db_columnMAX,db_columnMIN):
 ## :type       database:      pandas.DataFrame
 ## :param      df_pct:        The df pct - dataframe with the percentiles
 ## :type       df_pct:        pandas.DataFrame
-## :param      db_columnMAX:  The column of the database with maximum temperatures to be compared with CTX_pct
+## :param      db_columnMAX:  The column of the database with maximum
+##                            temperatures to be compared with CTX_pct
 ## :type       db_columnMAX:  String
-## :param      db_columnMIN:  The column of the database with minimum temperatures to be compared with CTN_pct
+## :param      db_columnMIN:  The column of the database with minimum
+##                            temperatures to be compared with CTN_pct
 ## :type       db_columnMIN:  String
 ##
-## :returns:   The database including the column 'below_pct' . 
+## :returns:   The database including the column 'below_pct' .
 ## :rtype:     pandas.DataFrame
 ##
 def get_belowPct(database,df_pct,db_columnMAX,db_columnMIN):
     df_aux=pd.DataFrame()
-    database=database.set_index(['DAY365'])
+    database.set_index(['DAY365'],inplace=True)
+    
     for year in database.DATE.dt.year.unique():
         df_year = database[database.DATE.dt.year == year]
-        df_year['below_pct'] = np.where(((df_year[db_columnMAX] <= df_pct['CTX10pct']) & (df_year[db_columnMIN] <= df_pct['CTN10pct'])), 1, 0) #checks if the value in db_column is equal or less than the corresponding percentile
+        df_year.loc[:,'below_pct'] = 0
+        mask_cw = (df_year[db_columnMAX] <= df_pct['CTX10pct']) & (df_year[db_columnMIN] <= df_pct['CTN10pct'])
+        df_year.loc[mask_cw,'below_pct'] = 1
+        #checks if the value in db_column is equal or less than the corresponding percentile
         #column 'below_pct' receives 1 if the condition is satisfied otherwise it receives 0    
-        if df_aux is None: #if df_aux is empty
-            df_aux = df_year #df_aux receives df_year
+        if df_aux is None: # if df_aux is empty
+            df_aux = df_year # df_aux receives df_year
         else:
-            df_aux=df_aux.append(df_year) #otherwise it appends df_year to df_aux
-            
+            df_aux=df_aux.append(df_year) # otherwise it appends df_year to df_aux
+    
     df_aux=df_aux.reset_index()
     
     return df_aux
@@ -234,15 +246,12 @@ def get_belowPct(database,df_pct,db_columnMAX,db_columnMIN):
 ## :type       wave_column:  String
 ## :param      wave_column:  Name of the column that is going to store information about Heat/Cold Waves (e.g. 'HW' or 'CW')
 ##
-## :type       extremeDays_column:  String
-## :param      extremeDays_column:  Name of the column that indicates days with extreme temperature ('above_pct' or 'below_pct')
-##
 ## :returns:   database dataframe including column 'HW' or 'CW'
 ## :rtype:     pandas.DataFrame
 ##
-def get_wave(df_wave,wave_column,extremeDays_column):
-    check_pattern = df_wave.rolling(3)[extremeDays_column].apply(lambda x: all(np.equal(x, [1,1,1])),raw=True) #use rolling to check for the pattern 111 in the above_pct/below_pct column
-    check_pattern = check_pattern.sum(axis = 1).astype(bool)
+def get_wave(df_wave,wave_column,pct_column):
+    check_pattern = df_wave.rolling(3)[pct_column].apply(lambda x: all(np.equal(x, [1,1,1])),raw=True) #use rolling to check for the pattern 111 in the above_pct/below_pct column
+    check_pattern = check_pattern.fillna(False).astype(bool)
     pattern_idx = np.where(check_pattern)[0] #gets the index of the last ocurrence of '1' for each sequence
     
     subset = [range(idx-3+1, idx+1) for idx in pattern_idx] #gets the range of each  wave - the indexes of all 1's ocurrences in a sequence
@@ -258,38 +267,27 @@ def get_wave(df_wave,wave_column,extremeDays_column):
 
 #-------------------------------------------------------------------------------
 ## Checks for Heat Waves on the database according to the Climatic Normal This
-## function uses Geirinhas et al. method It obtains first a dataframe with the
-## percentiles computed from the Climatic Normal according to the defined window
-## size Then compares it with the database, to check if the maximum and minimum
-## temperatures are above the corresponding percentile If the temperatures are
-## above the threshold, the column 'above_pct' receives 1 This column is then
-## used to identify if there are 3 or more consecutive extremely warm days (Heat
-## Wave) The column 'HW' then receives 1 for the days that are inside of a Heat
-## Wave
+## function uses Geirinhas et al. 2018 method. It obtains first a dataframe with
+## the percentiles computed from the Climatic Normal according to the defined
+## window size (df_pct). Then compares it with the database, to check if the
+## maximum and minimum temperatures are above the corresponding percentile. If
+## the temperatures are above the threshold, the column 'above_pct' receives 1.
+## This column is then used to identify if there are 3 or more consecutive
+## extremely warm days (Heat Wave). The column 'HW' then receives 1 for the days
+## that are inside of a Heat Wave
 ##
-## Climatic Normal dataframe needs to have at least 'DATE' and 'pct_column'
-## Database dataframe needs to have at least 'DATE' and 'db_column' IF either or
-## one of those dataframes don't have the 'DAY365' column (day of the year
-## column), cn_columnDay365 and/or db_columnDay365 parameters must be 0,
-## otherwise 1
+## Climatic Normal dataframe needs to have at least 'DATE' and 'pct_column'.
+## Database dataframe needs to have at least 'DATE' and 'db_column'. IF either
+## or one of those dataframes don't have the 'DAY365' column (day of the year
+## column), cn_columnDay365 and/or db_columnDay365 parameters must be False,
+## otherwise True.
 ##
-## If there are missing dates on the database, db_complete parameter must be 0,
-## otherwise 1
+## If there are missing DATES on the database, db_complete parameter must be
+## False, otherwise True.
 ##
-## :type       climatic_normal:   pandas.DataFrame
-## :param      climatic_normal:   The climatic normal
-## :type       pct_columnMAX:     String
-## :param      pct_columnMAX:     Name of the column from the climatic normal
-##                                used to calculate the percentile for maximum
-##                                temperatures
-## :type       pct_columnMIN:     String
-## :param      pct_columnMIN:     Name of the column from the climatic normal
-##                                used to calculate the percentile for minimum
-##                                temperatures
-## :type       cn_columnDay365:   Integer (0 or 1)
-## :param      cn_columnDay365:   Indicates if the climatic normal has the
-##                                Day365/day of the year column (cn_columnDay365
-##                                = 1) or not (cn_columnDay365 = 0)
+## In case the df_pct was previously obtained, set df_pct = Dataframe obtained
+## and set climatic_normal and pct_columns to None or any value/dataframe.
+##
 ## :type       database:          pandas.DataFrame
 ## :param      database:          The database
 ## :type       db_columnMAX:      String
@@ -300,87 +298,100 @@ def get_wave(df_wave,wave_column,extremeDays_column):
 ## :param      db_columnMIN:      Name of the column of the database with
 ##                                minimum temperatures to be compared with
 ##                                CTN_pct
-## :type       db_columnDay365:   Integer (0 or 1)
+## :type       climatic_normal:   pandas.DataFrame
+## :param      climatic_normal:   The climatic normal
+## :type       pct_columnMAX:     String
+## :param      pct_columnMAX:     Name of the column from the climatic normal
+##                                used to calculate the percentile for maximum
+##                                temperatures
+## :type       pct_columnMIN:     String
+## :param      pct_columnMIN:     Name of the column from the climatic normal
+##                                used to calculate the percentile for minimum
+##                                temperatures
+## :type       db_columnDay365:   Boolean (True or False)
 ## :param      db_columnDay365:   Indicates if the database has the Day365/day
-##                                of the year column (db_columnDay365 = 1) or
-##                                not (db_columnDay365 = 0)
-## :type       db_complete:       Integer (0 or 1)
-## :param      db_complete:       Indicates if the database has missing dates
-##                                (db_complete = 0) or not (db_complete = 1)
+##                                of the year column (db_columnDay365 = True) or
+##                                not (db_columnDay365 = False - default)
+## :type       db_complete:       Boolean (True or False)
+## :param      db_complete:       Indicates if the database has missing DATES
+##                                (db_complete = False - default) or not
+##                                (db_complete = True)
+## :type       cn_columnDay365:   Boolean (True or False)
+## :param      cn_columnDay365:   Indicates if the climatic normal has the
+##                                Day365/day of the year column (cn_columnDay365
+##                                = True) or not (cn_columnDay365 = False -
+##                                default)
+## :type       df_pct:            pandas.DataFrame
+## :param      df_pct:            The df pct - in case the dataframe with
+##                                percentiles was already obtained, otherwise
+##                                set df_pct = None (default)
 ## :type       percentile_value:  Float
-## :param      percentile_value:  The percentile value (0 to 1.0)
+## :param      percentile_value:  The percentile value (0 to 1.0), default = 0.9
 ## :type       window_size:       Integer
 ## :param      window_size:       The size of the window used to calculate the
-##                                percentile exp
+##                                percentile, default = 15 days
 ##
 ## :returns:   df_checkHW -> database dataframe including columns 'above_pct'
-##             and 'HW'
+##             and 'HW' 
+##             df_pct -> dataframe with percentiles for each day of the
+##             year (1 to 365)
 ## :rtype:     pandas.DataFrame
 ##
-def check_HeatWave(climatic_normal,pct_columnMAX,pct_columnMIN,cn_columnDay365,database,db_columnMAX,db_columnMIN,db_columnDay365,db_complete,percentile_value,window_size):
-    
+def check_HeatWave(database,db_columnMAX,db_columnMIN,climatic_normal,pct_columnMAX,pct_columnMIN,db_columnDay365=False,db_complete=False,cn_columnDay365=False,df_pct = None,percentile_value=0.9,window_size=15):
     if not db_complete:#in case db is incomplete - with missing dates
         database=complete_df(database) #add the missing dates without altering original db
-
-    if not cn_columnDay365: #in case there is no 'DAY365' column
-        climatic_normal = date_toDay365(climatic_normal) #add column 'DAY365' to the dataframe
     if not db_columnDay365: #in case there is no 'DAY365' column
         database = date_toDay365(database) #add column 'DAY365' to the dataframe
-
-    climatic_normal = drop_leapday(climatic_normal) #removes leap day from climatic normal
-    database = drop_leapday(database) #removes leap day from the database    
-
-    df_pct = pd.DataFrame() #creates a dataframe to store the percentiles
-    df_pct['DAY365']=range(1,366) #creates 'DAY365' column with each row receiving values 1 to 365
-    df_pct=df_pct.set_index(['DAY365']) # 'DAY365' is set as index
-
-    df_pct['CTX90pct'] = df_pct.index.map(lambda day365_index: get_percentile(climatic_normal,day365_index,pct_columnMAX,percentile_value,window_size))
-    df_pct['CTN90pct'] = df_pct.index.map(lambda day365_index: get_percentile(climatic_normal,day365_index,pct_columnMIN,percentile_value,window_size))
-    #column 'percentiles'of df_pct receive the value of percentiles according to pct_column
-
-    df_wave = get_abovePct(database,df_pct,db_columnMAX,db_columnMIN) #df_wave receives the database plus 'above_pct' column
     
+    database = drop_leapday(database) #removes leap day from the database
+    
+    if df_pct is None:
+            
+        if not cn_columnDay365: #in case there is no 'DAY365' column
+            climatic_normal = date_toDay365(climatic_normal) #add column 'DAY365' to the dataframe
+      
+        climatic_normal = drop_leapday(climatic_normal) #removes leap day from climatic normal
+
+        df_pct = pd.DataFrame() # creates a dataframe to store the percentiles
+        df_pct['DAY365']=range(1,366) #creates 'DAY365' column with each row receiving values 1 to 365
+        df_pct=df_pct.set_index(['DAY365']) # 'DAY365' is set as index
+    
+        df_pct['CTX90pct'] = df_pct.index.map(lambda day365_index: get_percentile(climatic_normal,day365_index,pct_columnMAX,percentile_value,window_size))
+        df_pct['CTN90pct'] = df_pct.index.map(lambda day365_index: get_percentile(climatic_normal,day365_index,pct_columnMIN,percentile_value,window_size))
+        #column 'percentiles'of df_pct receive the value of percentiles according to pct_column
+    
+    df_wave = get_abovePct(database,df_pct,db_columnMAX,db_columnMIN) #df_wave receives the database plus 'above_pct' column
+
     df_checkHW=get_wave(df_wave,'HW','above_pct') #df_checkHW receives the database plus 'above_pct' column and wave_column 'HW' column
     
-    return df_checkHW
+    return df_checkHW, df_pct
 
 
 #-------------------------------------------------------------------------------
 ## Checks for Cold Waves on the database according to the Climatic Normal
 ##
 ## Checks for Cold Waves on the database according to the Climatic Normal This
-## function uses Geirinhas et al. method It obtains first a dataframe with the
-## percentiles computed from the Climatic Normal according to the defined window
-## size Then compares it with the database, to check if the maximum and minimum
-## temperatures are below the corresponding percentile If the temperatures are
-## above the threshold, the column 'below_pct' receives 1 This column is then
-## used to identify if there are 3 or more consecutive extremely cold days (Cold
-## Wave) The column 'CW' then receives 1 for the days that are inside of a Cold
-## Wave
+## function uses Geirinhas et al. 2018 method. It obtains first a dataframe with
+## the percentiles computed from the Climatic Normal according to the defined
+## window size Then compares it with the database, to check if the maximum and
+## minimum temperatures are below the corresponding percentile. If the
+## temperatures are above the threshold, the column 'below_pct' receives 1. This
+## column is then used to identify if there are 3 or more consecutive extremely
+## cold days (Cold Wave) The column 'CW' then receives 1 for the days that are
+## inside of a Cold Wave
 ##
 ## Climatic Normal dataframe needs to have at least 'DATE' and 'pct_column'
 ## Database dataframe needs to have at least 'DATE' and 'db_column' IF either or
 ## one of those dataframes don't have the 'DAY365' column (day of the year
-## column), cn_columnDay365 and/or db_columnDay365 parameters must be 0,
-## otherwise 1
+## column), cn_columnDay365 and/or db_columnDay365 parameters must be False,
+## otherwise True
 ##
-## If there are missing dates on the database, db_complete parameter must be 0,
-## otherwise 1
+## If there are missing dates on the database, db_complete parameter must be
+## False, otherwise True
 ##
-## :type       climatic_normal:   pandas.DataFrame
-## :param      climatic_normal:   The climatic normal
-## :type       pct_columnMAX:     String
-## :param      pct_columnMAX:     Name of the column from the climatic normal
-##                                used to calculate the percentile for maximum
-##                                temperatures
-## :type       pct_columnMIN:     String
-## :param      pct_columnMIN:     Name of the column from the climatic normal
-##                                used to calculate the percentile for minimum
-##                                temperatures
-## :type       cn_columnDay365:   Integer (0 or 1)
-## :param      cn_columnDay365:   Indicates if the climatic normal has the
-##                                Day365/day of the year column (cn_columnDay365
-##                                = 1) or not (cn_columnDay365 = 0)
+## In case the df_pct was previously obtained, set df_pct = Dataframe obtained
+## and set climatic_normal and pct_columns to None or any value/dataframe.
+##
 ## :type       database:          pandas.DataFrame
 ## :param      database:          The database
 ## :type       db_columnMAX:      String
@@ -391,88 +402,321 @@ def check_HeatWave(climatic_normal,pct_columnMAX,pct_columnMIN,cn_columnDay365,d
 ## :param      db_columnMIN:      Name of the column of the database with
 ##                                minimum temperatures to be compared with
 ##                                CTN_pct
-## :type       db_columnDay365:   Integer (0 or 1)
+## :type       climatic_normal:   pandas.DataFrame
+## :param      climatic_normal:   The climatic normal
+## :type       pct_columnMAX:     String
+## :param      pct_columnMAX:     Name of the column from the climatic normal
+##                                used to calculate the percentile for maximum
+##                                temperatures
+## :type       pct_columnMIN:     String
+## :param      pct_columnMIN:     Name of the column from the climatic normal
+##                                used to calculate the percentile for minimum
+##                                temperatures
+## :type       db_columnDay365:   Boolean (True or False)
 ## :param      db_columnDay365:   Indicates if the database has the Day365/day
-##                                of the year column (db_columnDay365 = 1) or
-##                                not (db _columnDay365 = 0)
-## :type       db_complete:       Integer (0 or 1)
+##                                of the year column (db_columnDay365 = True) or
+##                                not (db_columnDay365 = False)
+## :type       db_complete:       Boolean (True or False)
 ## :param      db_complete:       Indicates if the database has missing dates
-##                                (db_complete = 0) or not (db_complete = 1)
+##                                (db_complete = False) or not (db_complete =
+##                                True)
+## :type       cn_columnDay365:   Boolean (True or False)
+## :param      cn_columnDay365:   Indicates if the climatic normal has the
+##                                Day365/day of the year column (cn_columnDay365
+##                                = True) or not (cn_columnDay365 = False)
+## :type       df_pct:            pandas.DataFrame
+## :param      df_pct:            The df pct - in case the dataframe with
+##                                percentiles was already obtained and is going
+##                                to reused, otherwise set df_pct = None
+##                                (default)
 ## :type       percentile_value:  Float
-## :param      percentile_value:  The percentile value (0 to 1.0)
+## :param      percentile_value:  The percentile value (0 to 1.0) - default 0.9
 ## :type       window_size:       Integer
 ## :param      window_size:       The size of the window used to calculate the
-##                                percentile exp
+##                                percentile - default 15 days
 ##
 ## :returns:   df_checkCW -> database dataframe including columns 'below_pct'
-##             and 'CW'
+##             and 'CW' 
+##             df_pct -> dataframe with percentiles for each day of the
+##             year (1 to 365)
 ## :rtype:     pandas.DataFrame
 ##
-def check_ColdWave(climatic_normal,pct_columnMAX,pct_columnMIN,cn_columnDay365,database,db_columnMAX,db_columnMIN,db_columnDay365,db_complete,percentile_value,window_size):
-    
+def check_ColdWave(database,db_columnMAX,db_columnMIN,climatic_normal,pct_columnMAX,pct_columnMIN,db_columnDay365=False,db_complete=False,cn_columnDay365=False,df_pct = None,percentile_value=0.1,window_size=15):
     if not db_complete:#in case db is incomplete - with missing dates
         database=complete_df(database) #add the missing dates without altering original db
 
-    if not cn_columnDay365: #in case there is no 'DAY365' column
-        climatic_normal = date_toDay365(climatic_normal) #add column 'DAY365' to the dataframe
     if not db_columnDay365: #in case there is no 'DAY365' column
         database = date_toDay365(database) #add column 'DAY365' to the dataframe
-
-    climatic_normal = drop_leapday(climatic_normal) #removes leap day from climatic normal
-    database = drop_leapday(database) #removes leap day from the database
-
-    df_pct = pd.DataFrame() #creates a dataframe to store the percentiles
-    df_pct['DAY365']=range(1,366) #creates 'DAY365' column with each row receiving values 1 to 365
-    df_pct=df_pct.set_index(['DAY365']) # 'DAY365' is set as index
-
-    df_pct['CTX10pct'] = df_pct.index.map(lambda day365_index: get_percentile(climatic_normal,day365_index,pct_columnMAX,percentile_value,window_size))
-    df_pct['CTN10pct'] = df_pct.index.map(lambda day365_index: get_percentile(climatic_normal,day365_index,pct_columnMIN,percentile_value,window_size))
     
+    database = drop_leapday(database) #removes leap day from the database
+    
+    if df_pct is None:
+        
+        if not cn_columnDay365: #in case there is no 'DAY365' column
+            climatic_normal = date_toDay365(climatic_normal) #add column 'DAY365' to the dataframe
+                
+        climatic_normal = drop_leapday(climatic_normal) #removes leap day from climatic normal
+
+        df_pct = pd.DataFrame() #creates a dataframe to store the percentiles
+        df_pct['DAY365']=range(1,366) #creates 'DAY365' column with each row receiving values 1 to 365
+        df_pct=df_pct.set_index(['DAY365']) # 'DAY365' is set as index
+    
+        df_pct['CTX10pct'] = df_pct.index.map(lambda day365_index: get_percentile(climatic_normal,day365_index,pct_columnMAX,percentile_value,window_size))
+        df_pct['CTN10pct'] = df_pct.index.map(lambda day365_index: get_percentile(climatic_normal,day365_index,pct_columnMIN,percentile_value,window_size))
+        
     df_wave = get_belowPct(database,df_pct,db_columnMAX,db_columnMIN) #df_wave receives the database plus 'below_pct' column
     
     df_checkCW=get_wave(df_wave,'CW','below_pct') #df_checkW receives the database plus 'below_pct' column and 'CW' column
     
-    return df_checkCW
+    return df_checkCW, df_pct
 
 #-------------------------------------------------------------------------------
-## Function to obtain the metrics of a Heat/Cold Wave given the database dataframe containing the 'HW'/'CW' column
-## that indicates if a day is inside of a Heat/Cold Wave or not -> check get_wave function
-## This function obtains the wave duration for each year (HWN) of the database and then computes its maximum duration (HWD)
-## and its intensity - sum of wave durations (HWF)
-## These metrics are stored in a dataframe which includes the Heat/Cold Wave metrics for each year of the database
+## Function to obtain the metrics of a Heat/Cold Wave given the database
+## dataframe containing the 'HW'/'CW' column that indicates if a day is inside
+## of a Heat/Cold Wave or not -> check get_wave function. This function obtains
+## the wave duration for each year (HWN) of the database and then computes its
+## maximum duration (HWD) and its intensity - sum of wave durations (HWF). These
+## metrics are stored in a dataframe which includes the Heat/Cold Wave metrics
+## for each year of the database
+##
+## Also possible to plot the metrics, for a better adjustment of the plots, go
+## to function plot_oneMetric
+##
 ## :param      df_checkW:    Database dataframe with 'HW'/'CW' column
 ## :type       df_checkW:    pandas.DataFrame
-## :param      wave_column:  Name of the column containing information about Heat/Cold Waves
+## :param      wave_column:  Name of the column containing information about
+##                           Heat/Cold Waves
 ## :type       wave_column:  String
+## :param      plot:         If True, function plot_oneMetric is used to plot
+##                           all metrics generated
+## :type       plot:         Boolean (True or False)
 ##
-## :returns:   df_waveMetrics Dataframe containing wave metrics for each year of the database
+## :returns:   df_waveMetrics Dataframe containing wave metrics for each year of
+##             the database
 ## :rtype:     pandas.DataFrame
 ##
-def wave_metrics(df_checkW,wave_column):
-    counter=0 
+def wave_metrics(df_checkW,wave_column,plot=False):
+    counter=0
+    wave=[]
+    aux_list=[]
     waveDuration=[]
     df_waveMetrics=pd.DataFrame()
+
+    #define names for metricss columns according to wave_column (e.g. HWN or CWN)
     n_waves = wave_column+str('N')
     maxd_waves = wave_column+str('D')
     sum_waves = wave_column+str('F')
-    df_waveMetrics['YEAR']=df_checkW.DATE.dt.year.unique() #column 'year' of the df receives the years from the database
-    df_waveMetrics=df_waveMetrics.set_index(['YEAR']) #column 'year' is set as index
-    for year in df_checkW.DATE.dt.year.unique():
-        df_year = df_checkW[df_checkW.DATE.dt.year == year] #auxiliar dataframe to store the current year
-        wave_idx = np.flatnonzero(df_year[wave_column]) #gets the indexes of the days involved in a Heat/Cold wave
-        for group in mit.consecutive_groups(wave_idx): #according to the indexes it separates each heat/cold wave in a group
-            counter+=1 #counts the number of groups - number of Heat/Cold waves
-            waveDuration.append(len(list(group))) #stores the duration of waves in a list
-        df_waveMetrics.loc[year,n_waves]=counter #stores in the df the number of waves
-        if not waveDuration: #in case there in no heat/cold wave
-            df_waveMetrics.loc[year,maxd_waves]=0 #store 0 as the maximum duration
-            df_waveMetrics.loc[year,sum_waves]=0 #store 0 as the sum of durations
-        else:
-            df_waveMetrics.loc[year,maxd_waves]=max(waveDuration) #stores in the df the maximum wave duration
-            df_waveMetrics.loc[year,sum_waves]=sum(waveDuration) #stores in the df the sum of wave durations
-        counter=0 #reinitialize the counter
-        waveDuration=[] #reinitialize the list
+
+    df_waveMetrics['YEAR']=df_checkW.DATE.dt.year.unique() #column 'year' of the df receives the unique years from the database
+    df_waveMetrics=df_waveMetrics.set_index(['YEAR'])
+
+    wave_idx = np.flatnonzero(df_checkW[wave_column]) #obtains indices of heat/cold wave days
+    for group in mit.consecutive_groups(wave_idx): #select each heat/cold wave event
+        wave.append(list(group)) #add event to a list
+
+        # stores in an auxiliar list the year of the event and its length
+        aux_list = [df_checkW.DATE.dt.year.iloc[wave[counter][0]],len(wave[counter])] 
+
+        waveDuration.append(aux_list) #stores aux_list in waveDuration list
+        counter+=1 #counter is incremented to go for next event
+
+    df_aux = pd.DataFrame(waveDuration) #transform list with heat/cold waves information into a dataframe
+
+    # 0 column of df_aux contains the years
+    df_waveMetrics.loc[:,n_waves] = df_aux[0].value_counts().sort_index() #stores HWN/CWN on respective colum - number of events in a year
+    df_waveMetrics.loc[:,maxd_waves] = df_aux.groupby(by=0).max() #stores HWD/CWD - longest event duration in a year
+    df_waveMetrics.loc[:,sum_waves] = df_aux.groupby(by=0).sum() #stores HWF/CWF - cumulative sum of heat/cold waves in a year
+    df_waveMetrics = df_waveMetrics.fillna(value=0) #years that didn't receive values are set to 0
+    
+    if plot: #if plot == True
+        plot_oneMetric(df_waveMetrics,n_waves,n_waves) #plot HWN/CWN
+        plot_oneMetric(df_waveMetrics,maxd_waves,maxd_waves) #plot HWD/CWD
+        plot_oneMetric(df_waveMetrics,sum_waves,sum_waves) #plot HWF/CWF
     
     return df_waveMetrics
 
+#--------------------------------------------------------------------------------
+## Function to obtain the metrics of a Heat/Cold Wave given the database
+## dataframe containing the 'HW'/'CW' column that indicates if a day is inside
+## of a Heat/Cold Wave or not -> check get_wave function. This function obtains
+## the wave duration for each year (HWN) of the database and then computes its
+## maximum duration (HWD) and its intensity - sum of wave durations (HWF). These
+## metrics are stored in a dataframe which includes the Heat/Cold Wave metrics
+## for each year of the database
+##
+## Also possible to plot the metrics, for a better adjustment of the plots, go
+## to function plot_oneMetric
+##
+## :param      df_checkW:    The df check w
+## :type       df_checkW:    { type_description }
+## :param      wave_column:  The wave column
+## :type       wave_column:  { type_description }
+## :param      plot:         The plot
+## :type       plot:         boolean
+##
+## :returns:   { description_of_the_return_value }
+## :rtype:     { return_type_description }
+##
+def wave_seasonMetrics(df_checkW,wave_column,plot=False):
+    counter=0
+    wave=[]
+    aux_list=[]
+    waveDuration=[]
+    wave_idx = np.flatnonzero(df_checkW[wave_column])
+    
+    seasons = ['1', '1', '2', '2', '2', '3', '3', '3', '4', '4', '4', '1']
+    month_to_season = dict(zip(range(1,13), seasons))
+    
+    n_waves = wave_column+str('N')
+    maxd_waves = wave_column+str('D')
+    sum_waves = wave_column+str('F')
+        
+    for group in mit.consecutive_groups(wave_idx):
+        wave.append(list(group))
+        if df_checkW.DATE.dt.month.iloc[wave[counter][0]] == 12:
+            aux_list = [df_checkW.DATE.dt.year.iloc[wave[counter][0]]+1,
+                        df_checkW.DATE.dt.month.iloc[wave[counter][0]],len(wave[counter])]
+        else:
+            aux_list = [df_checkW.DATE.dt.year.iloc[wave[counter][0]],
+                        df_checkW.DATE.dt.month.iloc[wave[counter][0]],len(wave[counter])]
+        waveDuration.append(aux_list)
+        counter+=1
+        
+    df_aux = pd.DataFrame(waveDuration, columns =['YEAR','SEASON','waveDuration'])
+    df_aux['SEASON'] = df_aux['SEASON'].map(month_to_season)
+    df_aux = df_aux.rename(columns = {0:'YEAR',3:'SEASON',2:'waveDuration'})
+    
+    df_seasonMetrics = pd.DataFrame()
+    df_seasonMetrics[n_waves] = df_aux.groupby(['YEAR','SEASON']).size()
+    df_seasonMetrics[maxd_waves] = df_aux.groupby(['YEAR','SEASON']).max()
+    df_seasonMetrics[sum_waves] = df_aux.groupby(['YEAR','SEASON']).sum()
+    
+    list_year = df_checkW.DATE.dt.year.unique()
+    list_season = ['1','2','3','4']
+    idx = tuple([(x, y) for x in list_year for y in list_season])
+    dfwave_seasonMetrics = pd.DataFrame(data = df_seasonMetrics, columns=[n_waves, maxd_waves, sum_waves], 
+                                        index=pd.MultiIndex.from_tuples(idx, names=['YEAR', 'SEASON']))
+    dfwave_seasonMetrics = dfwave_seasonMetrics.fillna(value=0)
+    
+    if plot:
+        plot_oneSeasonMetric(dfwave_seasonMetrics,n_waves,n_waves,lim=4.2,x_interval=None)
+        plot_oneSeasonMetric(dfwave_seasonMetrics,maxd_waves,maxd_waves,lim=13)
+        plot_oneSeasonMetric(dfwave_seasonMetrics,sum_waves,sum_waves,lim=22.1,x_interval=None)
+        
+    return dfwave_seasonMetrics
+##
+## { function_description }
+##
+## :param      df_metrics:  The df metrics
+## :type       df_metrics:  { type_description }
+## :param      metric:      The metric
+## :type       metric:      { type_description }
+## :param      title:       The title
+## :type       title:       { type_description }
+## :param      lim:         The limit
+## :type       lim:         { type_description }
+## :param      y_interval:  The y interval
+## :type       y_interval:  number
+##
+## :returns:   { description_of_the_return_value }
+## :rtype:     { return_type_description }
+##
+def plot_oneMetric(df_metrics,metric,title,lim=None,y_interval=5):       
+    fig, axes = plt.subplots(figsize=(15,9),dpi=300)
+    fig.suptitle(title,fontsize=20)
+    
+    if metric == 'HWN':
+        ylabel ='Number of Heatwaves'
+        color ='blue'
+    
+    elif metric == 'CWN':
+        ylabel = 'Number of Coldwaves'
+        color ='blue'
+           
+    elif metric == 'HWD' or 'CWD':
+        ylabel ='Number of Days'
+        color ='orange'
+        
+    elif metric == 'HWF' or 'CWF':
+        ylabel = 'Number of Days'
+        color = 'green'
+                 
+    axes.bar(df_metrics.index, df_metrics[metric],color=color)
+    axes.set_ylabel(ylabel,fontsize=20)
+    axes.set_ylim(ymin=0,ymax=lim)
 
+    axes.xaxis.set_ticks(np.arange(df_metrics.index[0],df_metrics.index[-1]+1, y_interval))
+    axes.tick_params(axis='both', which='major', labelsize=15)
+    axes.grid()
+   
+    return fig
+
+##
+## { function_description }
+##
+## :param      df_seasonMetrics:  The df season metrics
+## :type       df_seasonMetrics:  { type_description }
+## :param      metric:            The metric
+## :type       metric:            { type_description }
+## :param      title:             The title
+## :type       title:             { type_description }
+## :param      lim:               The limit
+## :type       lim:               { type_description }
+## :param      x_interval:        The x interval
+## :type       x_interval:        number
+##
+## :returns:   { description_of_the_return_value }
+## :rtype:     { return_type_description }
+##
+def plot_oneSeasonMetric(df_seasonMetrics,metric,title,lim=None,x_interval=2):
+    fig, axs = plt.subplots(nrows=2, ncols=2,sharex=False,sharey=False,figsize=(15, 9), dpi=300, gridspec_kw={'hspace': 0.4,'wspace': 0.2})
+    fig.suptitle(title,fontsize=20,y=1.02)
+    
+    axs[0,0].yaxis.set_ticks(np.arange(0, lim, x_interval))
+    axs[0,1].yaxis.set_ticks(np.arange(0, lim, x_interval))
+    axs[1,0].yaxis.set_ticks(np.arange(0, lim, x_interval))
+    axs[1,1].yaxis.set_ticks(np.arange(0, lim, x_interval))
+    
+    axs[0, 0].grid()
+    axs[0, 1].grid()
+    axs[1, 0].grid()
+    axs[1, 1].grid()
+    
+    axs[0, 0].tick_params(axis='both', which='major', labelsize=15)
+    axs[0, 1].tick_params(axis='both', which='major', labelsize=15)
+    axs[1, 0].tick_params(axis='both', which='major', labelsize=15)
+    axs[1, 1].tick_params(axis='both', which='major', labelsize=15)
+    
+    if metric == 'HWN':
+        ylabel = 'Number of Heatwaves'
+    elif metric == 'CWN':
+        ylabel = 'Number of Coldwaves'
+    elif metric == 'HWF' or 'CWF':
+        ylabel = 'Number of Days'
+
+    elif metric == 'HWD' or 'CWD':
+        ylabel = 'Number of Days'
+        
+         
+    axs[0, 0].bar(df_seasonMetrics.index.levels[0],df_seasonMetrics[metric].xs('1', level=1), color='r')
+    axs[0, 0].set_title('Summer',fontsize=18)
+    axs[0, 0].set_ylabel(ylabel,fontsize=15)
+    
+    axs[0, 1].bar(df_seasonMetrics.index.levels[0],df_seasonMetrics[metric].xs('4', level=1), color='y')
+    axs[0, 1].set_title('Spring',fontsize=18)
+    axs[0, 1].set_ylabel(ylabel,fontsize=15)
+    
+    axs[1, 0].bar(df_seasonMetrics.index.levels[0],df_seasonMetrics[metric].xs('3', level=1), color='b')
+    axs[1, 0].set_title('Winter',fontsize=18)
+    axs[1, 0].set_ylabel(ylabel,fontsize=15)
+    
+    axs[1, 1].bar(df_seasonMetrics.index.levels[0],df_seasonMetrics[metric].xs('2', level=1), color='g')
+    axs[1, 1].set_title('Autumn',fontsize=18)
+    axs[1, 1].set_ylabel(ylabel,fontsize=15)
+    
+    axs[0,0].set_ylim(ymin=0,ymax=lim)
+    axs[0,1].set_ylim(ymin=0,ymax=lim)
+    axs[1,0].set_ylim(ymin=0,ymax=lim)
+    axs[1,1].set_ylim(ymin=0,ymax=lim)
+    
+    return fig       
