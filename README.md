@@ -18,15 +18,24 @@ This library implements a set of functions that are capable of identifying extre
 
 The main inputs to this library would be datasets from weather stations and datasets that characterize climate normal time series.
 
-** Author: ** Daniela S. Oliveira, daniela.souza@outlook.com
+**Author:** Daniela S. Oliveira, daniela.souza@outlook.com
 
-** Contributors: ** Felipe Pedroso, Lucas Ueda, Paula D. P. Costa
+**Contributors:** Felipe Pedroso, Lucas Ueda, Paula D. P. Costa
 
 ```
 
     You will need to install those modules
+    
+    Pandas              (0.25.3)
+    Numpy               (1.18.0)
+    More_itertools      (8.4.0)
+    Matplotlib          (3.1.2)
+```
+To use this library you will need to:
 
-    Pandas      (0.23.4)
+```python
+   
+   import climahe.climatex as tex
 ```
 ## Acknowledgment
 
