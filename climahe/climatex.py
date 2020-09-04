@@ -130,7 +130,7 @@ def day365_toDate(day365, year):
 ##                                percentile (e.g. 15)
 ## :type       window_size:       Integer
 ##
-## :returns:   Climatic normal including a column with the percentile values
+## :returns:   column with the percentile values according to pct_column 
 ## :rtype:     pandas.DataFrame
 ##
 def get_percentile(climatic_normal,day365_index,pct_column,percentile_value,window_size):
