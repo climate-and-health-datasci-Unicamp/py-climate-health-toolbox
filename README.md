@@ -18,12 +18,49 @@ This library implements a set of functions that are capable of identifying extre
 
 The main inputs to this library would be datasets from weather stations and datasets that characterize climate normal time series.
 
+#### Library functions
+
+Heatwaves and coldwaves are detected according to the methodology of Geirinhas et al. (2018). Those events are characterized by metrics of quantity, duration and frequency described in Fischer and Schär (2010).
+
+>*Requirements*: Input datasets need to have a column named 'DATE' of pandas datetime format, and columns for daily maximum and minimum temperature data.
+
+
+| Function             | Parameters                                                                                                                                                                            | Description                                                                                                                        |
+|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| complete_df          | dataset                                                                                                                                                                               | Adds missing dates to column DATE                                                                                                  |
+| drop_leapday         | dataset                                                                                                                                                                               | Removes leap day data                                                                                                              |
+| date_toDay365        | dataset                                                                                                                                                                               | Creates column DAY365 (day of the year) from column DATE                                                                           |
+| day365_toDate        | day365, year                                                                                                                                                                          | Obtains a date from year and day of the year                                                                                       |
+| get_percentile       | climatic_normal, day365_index, pct_column, <br>window_size, percentile_value                                                                                                          | Calculates pct_column percentile, according to each day of the year,  <br>using a window of X days centered on the day in question |
+| get_abovePct         | database, df_pct, db_columnMAX, db_columnMIN                                                                                                                                          | Evaluates if db_columnMAX and db_columnMIN are above the percentiles from df_pct (generated from climatic_normal)                  |
+| get_belowPct         | database, df_pct, db_columnMAX, db_columnMIN                                                                                                                                          | Evaluates if db_columnMAX and db_columnMIN are below the percentiles from df_pct (generated from climatic_normal)                  |
+| get_wave             | df_wave, wave_column, above or below pct column                                                                                                                                       | Checks if there are 3 consecutive days or more with values from wave_column above or below the percentiles threshold               |
+| check_HeatWave       | database, db_columnMAX, db_columMIN, climatic_normal, pct_columnMAX, pct_columnMIN, (db_columnDay365, db_complete, cn_columnDay365, df_pct, percentile_value, window_size - optional) | Detection of Heatwave events (temperatures above thresholds for 3 days or more) using the previous functions                       |
+| check_ColdWave       | database, db_columnMAX, db_columMIN, climatic_normal, pct_columnMAX, pct_columnMIN, (db_columnDay365, db_complete, cn_columnDay365, df_pct, percentile_value, window_size - optional) | Detection of Coldwave events (temperatures below thresholds for 3 days or more) using the previous functions                       |
+| wave_metrics         | df_checkW, wave_column, (plot - optional)                                                                                                                                             | Obtains yearly metrics - quantity, longest duration and frequency of events                                                        |
+| wave_seasonMetrics   | df_checkW, wave_column, (plot - optional)                                                                                                                                             | Obtains seasonal metrics - quantity, longest duration and frequency of events                                                      |
+| plot_oneMetric       | df_metrics, metric, title, (lim, x_interval - optional)                                                                                                                               | Plots metric from df_metrics - yearly metrics dataframe                                                                            |
+| plot_oneSeasonMetric | df_seasonMetrics, metric, title, (lim, y_interval - optional)                                                                                                                         | Plots metric from df_seasonMetrics - seasonal metrics dataframe                                                                    |
+
+#### Examples
+
+Useful scripts on how to use this library:
+
+
+| File                        | Description                                                                                            |
+|-----------------------------|--------------------------------------------------------------------------------------------------------|
+| [IAC_heatwave_analyses.ipynb](https://github.com/climate-and-health-datasci-Unicamp/py-climate-health-toolbox/blob/master/examples/IAC_heatwave_analyses.ipynb) | Heatwave analyses for the weather station of the Agronomic Institute of Campinas (IAC) in Campinas, SP |
+| [Comparison_IAC_VCP.ipynb](https://github.com/climate-and-health-datasci-Unicamp/py-climate-health-toolbox/blob/master/examples/Comparison_IAC_VCP.ipynb)    | Comparison between heatwave metrics of two weather stations from Campinas                              |
+
+______________________________________________________________________________________________________________________________________________________________
+
 **Author:** Daniela S. Oliveira, daniela.souza@outlook.com
 
 **Contributors:** Felipe Pedroso, Lucas Ueda, Paula D. P. Costa
 
-```
+#### Installation
 
+```
     You will need to install those modules
     
     Pandas              (0.25.3)
@@ -33,10 +70,23 @@ The main inputs to this library would be datasets from weather stations and data
 ```
 To use this library you will need to:
 
+```
+   pip install py-climate-health-toolbox
+```
 ```python
-   
    import climahe.climatex as tex
 ```
+
+#### Citing this library
+
+OLIVEIRA, Daniela Souza de; PEDROSO, Felipe Augusto; UEDA, Lucas Hideki; AVILA, Ana Maria Heuminski de; COSTA, Paula Dornhofer Paro. Python Climate and Health Toolbox: climatex. 0.0.3. [S. l.], 2020. <https://pypi.org/project/py-climate-health-toolbox/>.
+
+## References
+
+FISCHER, E. M.; SCHÄR, C. Consistent geographical patterns of changes in high-impact European heatwaves. Nature Geoscience, v. 3, n. 6, p. 398–403, 2010.
+
+GEIRINHAS, J. L. et al. Climatic and synoptic characterization of heat waves in Brazil. International Journal of Climatology, v. 38, n. 4, p. 1760–1776, 2018.
+
 ## Acknowledgment
 
 Grant 2017/20013-0 São Paulo Research Foundation (FAPESP)
