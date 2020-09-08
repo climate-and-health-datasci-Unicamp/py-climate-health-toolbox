@@ -41,6 +41,8 @@ Heatwaves and coldwaves are detected according to the methodology of Geirinhas e
 | wave_seasonMetrics   | df_checkW, wave_column, (plot - optional)                                                                                                                                             | Obtains seasonal metrics - quantity, longest duration and frequency of events                                                      |
 | plot_oneMetric       | df_metrics, metric, title, (lim, x_interval - optional)                                                                                                                               | Plots metric from df_metrics - yearly metrics dataframe                                                                            |
 | plot_oneSeasonMetric | df_seasonMetrics, metric, title, (lim, y_interval - optional)                                                                                                                         | Plots metric from df_seasonMetrics - seasonal metrics dataframe                                                                    |
+| wave_intensity | df_checkW,wave_column,db_columnMAX,df_pct,(season - optional)                                                                                                                         | Obtains the maximum temperature anomaly (Tmax minus percentile) of each Heat/Cold wave                                                        |
+
 
 #### Examples
 
@@ -79,7 +81,7 @@ To use this library you will need to:
 
 #### Citing this library
 
-OLIVEIRA, Daniela Souza de; PEDROSO, Felipe Augusto; UEDA, Lucas Hideki; AVILA, Ana Maria Heuminski de; COSTA, Paula Dornhofer Paro. Python Climate and Health Toolbox: climatex. 0.0.3. [S. l.], 2020. <https://pypi.org/project/py-climate-health-toolbox/>.
+OLIVEIRA, Daniela Souza de; PEDROSO, Felipe Augusto; UEDA, Lucas Hideki; COSTA, Paula Dornhofer Paro; AVILA, Ana Maria Heuminski de; FARIA, Eliana Cotta de. Python Climate and Health Toolbox: climatex. 0.0.3. [S. l.], 2020. <https://pypi.org/project/py-climate-health-toolbox/>.
 
 ## References
 
