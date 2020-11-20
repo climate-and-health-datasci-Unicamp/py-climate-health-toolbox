@@ -68,8 +68,7 @@ Useful scripts on how to use this library:
 
 | File                        | Description                                                                                            |
 |-----------------------------|--------------------------------------------------------------------------------------------------------|
-| [Climatex_example.ipynb](https://github.com/climate-and-health-datasci-Unicamp/py-climate-health-toolbox/blob/master/examples/Climatex_example.ipynb) | Example of how
-to use climatex functions                                                                   |
+| [Climatex_example.ipynb](https://github.com/climate-and-health-datasci-Unicamp/py-climate-health-toolbox/blob/master/examples/Climatex_example.ipynb) | Use of climatex functions in example datasets                                                               |
 | [IAC_heatwave_analyses.ipynb](https://github.com/climate-and-health-datasci-Unicamp/py-climate-health-toolbox/blob/master/examples/IAC_heatwave_analyses.ipynb) | Heatwave analyses for the weather station of the Agronomic Institute of Campinas (IAC) in Campinas, SP |
 | [Comparison_IAC_VCP.ipynb](https://github.com/climate-and-health-datasci-Unicamp/py-climate-health-toolbox/blob/master/examples/Comparison_IAC_VCP.ipynb)    | Comparison between heatwave metrics of two weather stations from Campinas                              |
 
