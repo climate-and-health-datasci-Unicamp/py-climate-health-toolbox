@@ -122,16 +122,19 @@ def sat_vap_pressure(T, degrees = "celsius"):
   if degrees == "farenheit":
     T = farenheit_to_celsius(T)
 
-  if T > 0:
-    svp = np.exp(34.494-(4924.99/(T+237.1)))/((T+105)**1.57)
-  
-  else:
-    svp = np.exp(43.494-(6545.8/(T+278)))/((T+868)**2)
+  svp = []
+  for i in T:
+    if (degrees != "celsius" and degrees != "farenheit"):
+      svp.append("NA")
 
-  svp = round(svp, 6)
+    else:
+      if i > 0:
+        svp.append(round(np.exp(34.494-(4924.99/(i+237.1)))/((i+105)**1.57),6))
+	  
+      else:
+        svp.append(round(np.exp(43.494-(6545.8/(i+278)))/((i+868)**2),6))
 
   if (degrees != "celsius" and degrees != "farenheit"):
-    svp = "NA"
     print("Invalid degrees. For degrees, choose either 'farenheit' or 'celsius'")
 
   return svp
