@@ -204,7 +204,7 @@ def relative_humidity_to_dewpoint(T, rh, degrees = "celsius"):
   if degrees == "farenheit":
   	Td = celsius_to_farenheit(Td)
 
-  Td = round(Td)
+  Td = round(Td, 6)
 
   if (degrees != "celsius" and degrees != "farenheit"):
     Td = "NA"
