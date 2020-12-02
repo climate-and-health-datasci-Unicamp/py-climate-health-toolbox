@@ -396,43 +396,55 @@ def wind_chill_canada(T, ws):
 ##
 
 def heat_index(T, rh, degrees = "celsius"):
+  
+  hi = np.zeros(len(T))
+  alpha = np.zeros(len(T))
+  adjustment1 = np.zeros(len(T))
+  adjustment2 = np.zeros(len(T))
+  total_adjustment = np.zeros(len(T))
+
   if degrees == "celsius":
     T = celsius_to_farenheit(T)
 
-  if T <= 40:
-    hi = T
+  for i in range(len(T)):
+    if (degrees != "celsius" and degrees != "farenheit"):
+      hi = [str(k) for k in hi]
+      hi[i] = "NA"
 
-  else:
-    alpha = 61 + ((T - 68)*1.2) + (rh*0.094)
-    hi = 0.5*(alpha + T)
+    else:
+      if T[i] <= 40:
+        hi[i] = T[i]
 
-    if hi > 79:
-      hi = (-42.379 + 2.04901523*T + 10.14333127*rh - 0.22475541*T*rh - 6.83783*(10**(-3))*(T**2) -
-            5.481717*(10**(-2))*(rh**2) + 1.22874*(10**(-3))*(T**2)*rh + 8.5282*(10**(-4))*T*(rh**2) - 
-            1.99*(10**(-6))*(T**2)*(rh**2))
+      else:
+        alpha[i] = 61 + ((T[i] - 68)*1.2) + (rh[i]*0.094)
+        hi[i] = 0.5*(alpha[i] + T[i])
+
+        if hi[i] > 79:
+          hi[i] = (-42.379 + 2.04901523*T[i] + 10.14333127*rh[i] - 0.22475541*T[i]*rh[i] - 6.83783*(10**(-3))*(T[i]**2) -
+                   5.481717*(10**(-2))*(rh[i]**2) + 1.22874*(10**(-3))*(T[i]**2)*rh[i] + 8.5282*(10**(-4))*T[i]*(rh[i]**2) - 
+                   1.99*(10**(-6))*(T[i]**2)*(rh[i]**2))
       
-      if (rh <= 13 and T >= 80 and T <= 112):
-        adjustment1 = (13 - rh)/4
-        adjustment2 = ((17 - abs(T - 95))/17)**(1/2)
-        total_adjustment = adjustment1*adjustment2
-        hi = hi - total_adjustment
+          if (rh[i] <= 13 and T[i] >= 80 and T[i] <= 112):
+            adjustment1[i] = (13 - rh[i])/4
+            adjustment2[i] = ((17 - abs(T[i] - 95))/17)**(1/2)
+            total_adjustment[i] = adjustment1[i]*adjustment2[i]
+            hi[i] = hi[i] - total_adjustment[i]
         
-      elif (rh > 85 and T >= 80 and T <= 87):
-        adjustment1 = (rh - 85)/10
-        adjustment2 = (87 - T)/5
-        total_adjustment = adjustment1*adjustment2
-        hi = hi + total_adjustment
+          elif (rh[i] > 85 and T[i] >= 80 and T[i] <= 87):
+            adjustment1[i] = (rh[i] - 85)/10
+            adjustment2[i] = (87 - T[i])/5
+            total_adjustment[i] = adjustment1[i]*adjustment2[i]
+            hi[i] = hi[i] + total_adjustment[i]
 
-  if degrees == "celsius":
-    hi = farenheit_to_celsius(hi)
+      if degrees == "celsius":
+        hi[i] = farenheit_to_celsius(hi[i])
 
-  hi = round(hi, 6)
+      hi[i] = round(hi[i], 6)
 
   if (degrees != "celsius" and degrees != "farenheit"):
-    hi = "NA"
     print("Invalid degrees. For degrees, choose either 'farenheit' or 'celsius'")
 
-  return hi  
+  return hi
 
 #-------------------------------------------------------------------------------------------------------------------------#
 ## Function to compute the thom discomfort index based on the air temperature and on the relative humidiy of a certain
