@@ -119,8 +119,11 @@ def kelvin_to_farenheit(TK):
 ##
 
 def sat_vap_pressure(T, degrees = "celsius"):
+  if (type(T) == int or type(T) == float):
+    T = list([T])
+
   if degrees == "farenheit":
-    T = farenheit_to_celsius(T)
+    T = [farenheit_to_celsius(i) for i in T]
 
   svp = []
   for i in T:
@@ -396,7 +399,12 @@ def wind_chill_canada(T, ws):
 ##
 
 def heat_index(T, rh, degrees = "celsius"):
-  
+  if (type(T) == int or type(T) == float):
+    T = list([T])
+
+  if (type(rh) == int or type(rh) == float):
+    rh = list([rh])
+
   hi = np.zeros(len(T))
   alpha = np.zeros(len(T))
   adjustment1 = np.zeros(len(T))
