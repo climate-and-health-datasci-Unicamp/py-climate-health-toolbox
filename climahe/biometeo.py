@@ -1,5 +1,6 @@
 '''
 Created on Mon Oct 19 13:39:25 2020
+Updated on Fri Nov 04 09:16:15 2020
 
 @author: João Luís Carvalho de Abreu
 
@@ -531,9 +532,11 @@ def humidex(T, humidity, degrees = "celsius", moisture_unit = "dewpoint"):
       humidex = round(humidex, 6)
 
     elif degrees == "farenheit":
+      T = farenheit_to_celsius(T)
       Td = farenheit_to_kelvin(Td)  
       e = 6.112*np.exp(5417.7530*((1/273.15)-(1/Td))) # in hPa
       humidex = T + 0.5555*(e - 10)
+      humidex = celsius_to_farenheit(humidex)
       humidex = round(humidex, 6)
 
   elif moisture_unit == "relative humidity":
@@ -547,9 +550,11 @@ def humidex(T, humidity, degrees = "celsius", moisture_unit = "dewpoint"):
       humidex = round(humidex, 6)
 
     elif degrees == "farenheit":
+      T = farenheit_to_celsius(T)
       Td = farenheit_to_kelvin(Td)  
       e = 6.112*np.exp(5417.7530*((1/273.15)-(1/Td))) # in hPa
       humidex = T + 0.5555*(e - 10)
+      humidex = celsius_to_farenheit(humidex)
       humidex = round(humidex, 6)
 
   if (degrees != "celsius" and degrees != "farenheit"):
