@@ -1,6 +1,6 @@
 '''
 Created on Mon Oct 19 13:39:25 2020
-Updated on Fri Nov 04 09:16:15 2020
+Updated on Fri Nov 04 23:40:15 2020
 
 @author: João Luís Carvalho de Abreu
 
@@ -22,7 +22,7 @@ import numpy as np
 ## :param 		TF: temperature in °F
 ## :type 		TF: Float
 ##
-## :returns 	TC: rounded temperature in °C
+## :returns 		TC: rounded temperature in °C
 ## :rtype 		TC: Float
 ##
 
@@ -36,7 +36,7 @@ def farenheit_to_celsius(TF):
 ## :param 		TC: temperature in °C
 ## :type 		TC: Float
 ##
-## :returns 	TF: rounded temperature in °F
+## :returns 		TF: rounded temperature in °F
 ## :rtype 		TF: Float
 ##
 
@@ -50,7 +50,7 @@ def celsius_to_farenheit(TC):
 ## :param 		TC: temperature in °C
 ## :type 		TC: Float
 ##
-## :returns 	TK: rounded temperature in K
+## :returns 		TK: rounded temperature in K
 ## :rtype 		TK: Float
 ##
 
@@ -64,7 +64,7 @@ def celsius_to_kelvin(TC):
 ## :param 		TK: temperature in K
 ## :type 		TK: Float
 ##
-## :returns 	TC: rounded temperature in °C
+## :returns 		TC: rounded temperature in °C
 ## :rtype 		TC: Float
 ##
 
@@ -78,7 +78,7 @@ def kelvin_to_celsius(TK):
 ## :param 		TF: temperature in °F
 ## :type 		TF: Float
 ##
-## :returns 	TK: rounded temperature in K
+## :returns 		TK: rounded temperature in K
 ## :rtype 		TK: Float
 ##
 
@@ -92,7 +92,7 @@ def farenheit_to_kelvin(TF):
 ## :param 		TK: temperature in K
 ## :type 		TK: Float
 ##
-## :returns 	TF: rounded temperature in °F
+## :returns 		TF: rounded temperature in °F
 ## :rtype 		TF: Float
 ##
 
@@ -112,7 +112,7 @@ def kelvin_to_farenheit(TK):
 ## :param 		degrees: degree unit (celsius or farenheit), defaut = celsius
 ## :type 		degrees: String
 ##
-## :returns 	svp: rounded saturated vapor pressure in Pa
+## :returns 		svp: rounded saturated vapor pressure in Pa
 ## :rtype 		svp: Float or String ("NA": not applicable)
 ## 
 ## Source: HUANG, J. A simple accurate formula for calculating saturation vapor pressureof water and ice. Journal of 
@@ -157,7 +157,7 @@ def sat_vap_pressure(T, degrees = "celsius"):
 ## :param 		degrees: degree unit (celsius or farenheit), defaut = celsius
 ## :type 		degrees: String
 ##
-## :returns 	avp: rounded actual vapor pressure in Pa
+## :returns 		avp: rounded actual vapor pressure in Pa
 ## :rtype 		avp: Float or String ("NA": not applicable)
 ##
 
@@ -189,7 +189,7 @@ def act_vap_pressure(T, rh, degrees = "celsius"):
 ## :param 		degrees: degree unit (celsius or farenheit), defaut = celsius
 ## :type 		degrees: Float
 ##
-## :returns 	Td: rounded dew point temperature in °C or °F
+## :returns 		Td: rounded dew point temperature in °C or °F
 ## :rtype 		Td: Float or String ("NA": not applicable)
 ##
 ## Source: converted from the Weathermetrics R library 
@@ -227,7 +227,7 @@ def relative_humidity_to_dewpoint(T, rh, degrees = "celsius"):
 ## :param 		degrees: degree unit (celsius or farenheit), defaut = celsius
 ## :type 		degrees: String
 ##
-## :returns 	rh: rounded relative humidity in %
+## :returns 		rh: rounded relative humidity in %
 ## :rtype 		rh: Float or String ("NA": not applicable)
 ##
 ## Source: converted from the Weathermetrics R library 
@@ -269,7 +269,7 @@ def dewpoint_to_relative_humidity(T, Td, degrees = "celsius"):
 ## :param 		degrees: degree unit (celsius or farenheit), defaut = celsius
 ## :type 		degrees: String
 ##
-## :returns 	at: rounded apparent temperature in °C or °F
+## :returns 		at: rounded apparent temperature in °C or °F
 ## :rtype 		at: Float or String ("NA": not applicable)
 ##
 ## Source: STEADMAN, R. G. A universal scale of apparent temperature.Journal of Climateand Applied Meteorology, v. 23, 
@@ -319,8 +319,8 @@ def apparent_temperature(T, P, ws = 0, condition = "indoors",  degrees = "celsiu
 ##					  us: respectively °F and mph
 ## :type 		unit: String
 ##
-## :returns 	wd: rounded wind chill in °C or °F
-## :rtype 		wd: Float or String ("NA": not applicable)
+## :returns 		wc: rounded wind chill in °C or °F
+## :rtype 		wc: Float or String ("NA": not applicable)
 ##
 ## Source: QUAYLE, R. G.; STEADMAN, R. G. The steadman wind chill: An improvementover present scales. Weather and 
 ## Forecasting, v. 13, n. 4, p. 1187–1193, 1998.
@@ -354,27 +354,45 @@ def wind_chill(T, ws, unit = "metric"):
 ## :param 		ws: wind speed at 10m from the ground in km/h
 ## :type 		ws: Float
 ##
-## :returns 	wd: rounded wind chill in °C
-## :rtype 		wd: Float or String ("NA": not applicable)
+## :returns 		wcc: rounded wind chill in °C
+## :rtype 		wcc: Float or String ("NA": not applicable)
 ##
 ## Source: Enviornment Canadas's website
 ##         Link: https://www.canada.ca/en/environment-climate-change/services/climate-change/canadian-centre-climate-services/display-download/technical-documentation-climate-normals.html#toc1
 ##
 
 def wind_chill_canada(T, ws):
-  if (T <= 0 and ws >= 5):
-    wc = 13.12 + 0.6215*T - 11.37*(ws**0.16) + 0.3965*T*(ws**0.16)
-    wc = round(wc, 6)
+  if (type(T) == int or type(T) == float):
+    T = list([T])
 
-  elif (T <= 0 and 0 <= ws <= 5):
-  	wc = T + ((-1.59 + 0.1345*T)/5)*ws
-  	wc = round(wc, 6)
+  if (type(ws) == int or type(ws) == float):
+    ws = list([ws])
 
-  else:
-  	wc = "NA"
-  	print("One or more parameters out of the due range.\nCheck if the air temperature is bellow 0°C and if the wind speed is a positive number.")
+  wcc = np.zeros(len(T))
+  not_available = []
+  error_state = 0
 
-  return wc
+  for i in range(len(T)):
+    if (T[i] <= 0 and ws[i] >= 5):
+      wcc[i] = 13.12 + 0.6215*T[i] - 11.37*(ws[i]**0.16) + 0.3965*T[i]*(ws[i]**0.16)
+      wcc[i] = round(wcc[i], 6)
+
+    elif (T[i] <= 0 and 0 <= ws[i] <= 5):
+      wcc[i] = T[i] + ((-1.59 + 0.1345*T[i])/5)*ws[i]
+      wcc[i] = round(wcc[i], 6)
+
+    else:
+      wcc = [str(k) for k in wcc]
+      wcc[i] = "NA"
+      not_available.append(i)
+      error_state = 1
+
+  if error_state == 1:
+    print("For the following lines, one or more parameters out of the due range:\n", not_available)
+    print("Check if the air temperature is bellow 0°C and if the wind speed is a positive number.")
+    print("Recommendation: try to use the regular 'wind_chill' formula.")
+
+  return wcc
 
 #-------------------------------------------------------------------------------------------------------------------------#
 ## Function to compute the heat index based on the air temperature and on the relative humidity of a certain
