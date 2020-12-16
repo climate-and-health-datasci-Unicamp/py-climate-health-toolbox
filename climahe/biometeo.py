@@ -129,7 +129,7 @@ def sat_vap_pressure(T, degrees = "celsius"):
   svp = []
   for i in T:
     if (degrees != "celsius" and degrees != "farenheit"):
-      svp.append("NA")
+      svp.append("NaN")
 
     else:
       if i > 0:
@@ -158,7 +158,7 @@ def sat_vap_pressure(T, degrees = "celsius"):
 ## :type 		degrees: String
 ##
 ## :returns 		avp: rounded actual vapor pressure in Pa
-## :rtype 		avp: Float or String ("NA": not applicable)
+## :rtype 		avp: Float or String ("NaN": not a number)
 ##
 
 def act_vap_pressure(T, rh, degrees = "celsius"):
@@ -169,7 +169,7 @@ def act_vap_pressure(T, rh, degrees = "celsius"):
   avp = round(avp, 6)
 
   if (degrees != "celsius" and degrees != "farenheit"):
-    avp = "NA"
+    avp = "NaN"
     print("Invalid degrees. For degrees, choose either 'farenheit' or 'celsius'")
 
   return avp
@@ -190,7 +190,7 @@ def act_vap_pressure(T, rh, degrees = "celsius"):
 ## :type 		degrees: Float
 ##
 ## :returns 		Td: rounded dew point temperature in °C or °F
-## :rtype 		Td: Float or String ("NA": not applicable)
+## :rtype 		Td: Float or String ("NaN": not a number)
 ##
 ## Source: converted from the Weathermetrics R library 
 ##         Link: https://github.com/geanders/weathermetrics/blob/master/R/heat_index.R
@@ -208,7 +208,7 @@ def relative_humidity_to_dewpoint(T, rh, degrees = "celsius"):
   Td = round(Td, 6)
 
   if (degrees != "celsius" and degrees != "farenheit"):
-    Td = "NA"
+    Td = "NaN"
     print("Invalid degrees. For degrees, choose either 'farenheit' or 'celsius'")
 
   return Td
@@ -228,7 +228,7 @@ def relative_humidity_to_dewpoint(T, rh, degrees = "celsius"):
 ## :type 		degrees: String
 ##
 ## :returns 		rh: rounded relative humidity in %
-## :rtype 		rh: Float or String ("NA": not applicable)
+## :rtype 		rh: Float or String ("NaN": not a number)
 ##
 ## Source: converted from the Weathermetrics R library 
 ##         Link: https://github.com/geanders/weathermetrics
@@ -244,7 +244,7 @@ def dewpoint_to_relative_humidity(T, Td, degrees = "celsius"):
   rh = round(rh, 6)
 
   if (degrees != "celsius" and degrees != "farenheit"):
-    rh = "NA"
+    rh = "NaN"
     print("Invalid degrees. For degrees, choose either 'farenheit' or 'celsius'")  
 
   return rh
@@ -270,7 +270,7 @@ def dewpoint_to_relative_humidity(T, Td, degrees = "celsius"):
 ## :type 		degrees: String
 ##
 ## :returns 		at: rounded apparent temperature in °C or °F
-## :rtype 		at: Float or String ("NA": not applicable)
+## :rtype 		at: Float or String ("NaN": not a number)
 ##
 ## Source: STEADMAN, R. G. A universal scale of apparent temperature.Journal of Climateand Applied Meteorology, v. 23, 
 ## n. 12, p. 1674–1687, 1984.
@@ -297,11 +297,11 @@ def apparent_temperature(T, P, ws = 0, condition = "indoors",  degrees = "celsiu
     at = round(at, 6)
 
   if (condition != "indoors" and condition != "shade"):
-    at = "NA"
+    at = "NaN"
     print("Invalid condition. Choose between either 'indoors' or 'shade'")
 
   if (degrees != "celsius" and degrees != "farenheit"):
-    at = "NA"
+    at = "NaN"
     print("Invalid degrees. For degrees, choose either 'farenheit' or 'celsius'")
   
   return at
@@ -320,7 +320,7 @@ def apparent_temperature(T, P, ws = 0, condition = "indoors",  degrees = "celsiu
 ## :type 		unit: String
 ##
 ## :returns 		wc: rounded wind chill in °C or °F
-## :rtype 		wc: Float or String ("NA": not applicable)
+## :rtype 		wc: Float or String ("NaN": not a number)
 ##
 ## Source: QUAYLE, R. G.; STEADMAN, R. G. The steadman wind chill: An improvementover present scales. Weather and 
 ## Forecasting, v. 13, n. 4, p. 1187–1193, 1998.
@@ -336,7 +336,7 @@ def wind_chill(T, ws, unit = "metric"):
     wc = round(wc, 6)
 
   if (unit != "metric" and unit != "us"):
-    wc = "NA"
+    wc = "NaN"
     print("Invalid units. Choose either 'metric' or 'us' units.")
 
   return wc
@@ -355,7 +355,7 @@ def wind_chill(T, ws, unit = "metric"):
 ## :type 		ws: Float
 ##
 ## :returns 		wcc: rounded wind chill in °C
-## :rtype 		wcc: Float or String ("NA": not applicable)
+## :rtype 		wcc: Float or String ("NaN": not a number)
 ##
 ## Source: Enviornment Canadas's website
 ##         Link: https://www.canada.ca/en/environment-climate-change/services/climate-change/canadian-centre-climate-services/display-download/technical-documentation-climate-normals.html#toc1
@@ -383,7 +383,7 @@ def wind_chill_canada(T, ws):
 
     else:
       wcc = [str(k) for k in wcc]
-      wcc[i] = "NA"
+      wcc[i] = "NaN"
       not_available.append(i)
       error_state = 1
 
@@ -411,7 +411,7 @@ def wind_chill_canada(T, ws):
 ## :type 		degrees: String
 ##
 ## :returns 	hi: rounded heat index in °C or °F
-## :rtype 		hi: Float or Sstring ("NA": not applicable)
+## :rtype 		hi: Float or Sstring ("NaN": not a number)
 ##
 ## Source: converted from the Weathermetrics R library based on the NWS formula
 ##         Link: https://github.com/geanders/weathermetrics
@@ -436,7 +436,7 @@ def heat_index(T, rh, degrees = "celsius"):
   for i in range(len(T)):
     if (degrees != "celsius" and degrees != "farenheit"):
       hi = [str(k) for k in hi]
-      hi[i] = "NA"
+      hi[i] = "NaN"
 
     else:
       if T[i] <= 40:
@@ -490,7 +490,7 @@ def heat_index(T, rh, degrees = "celsius"):
 ## :type 		degrees: String
 ##
 ## :returns 	di: rounded thom discomfort index in °C or °F
-## :rtype 		di: Float or String ("NA": not applicable)
+## :rtype 		di: Float or String ("NaN": not a number)
 ##
 ## Source: VANECKOVA, P. et al. Do biometeorological indices improve modeling outcomes of heat-related mortality?Journal 
 ## of Applied Meteorology and Climatology, v. 50, n. 6,p. 1165–1176, 2011.
@@ -508,7 +508,7 @@ def discomfort_index(T, rh, degrees = "celsius"):
   di = round(di, 6)
 
   if (degrees != "celsius" and degrees != "farenheit"):
-    di = "NA"
+    di = "NaN"
     print("Invalid degrees. For degrees, choose either 'farenheit' or 'celsius'")
 
   return di
@@ -533,7 +533,7 @@ def discomfort_index(T, rh, degrees = "celsius"):
 ## :type 		degrees: String
 ##
 ## :returns 	humidex: rounded humidity index (in the chosen degree unit)
-## :rtype 		humidex: Float or String ("NA": not applicable)
+## :rtype 		humidex: Float or String ("NaN": not a number)
 ##
 ## Source: Enviornment Canadas's website
 ##         Link: https://www.canada.ca/en/environment-climate-change/services/climate-change/canadian-centre-climate-services/display-download/technical-documentation-climate-normals.html#toc1
@@ -576,12 +576,12 @@ def humidex(T, humidity, degrees = "celsius", moisture_unit = "dewpoint"):
       humidex = round(humidex, 6)
 
   if (degrees != "celsius" and degrees != "farenheit"):
-    humidex = "NA"
+    humidex = "NaN"
     print("Invalid degrees. For degrees, choose either 'farenheit' or 'celsius'")
 
   if (moisture_unit != "dewpoint" and moisture_unit != "relative humidity"):
-  	humidex = "NA"
-  	print("Invalid moisture unit. Choose either 'dewpoint' or 'relative humidity'.")
+    humidex = "NaN"
+    print("Invalid moisture unit. Choose either 'dewpoint' or 'relative humidity'.")
 
   return humidex
 
@@ -601,7 +601,7 @@ def humidex(T, humidity, degrees = "celsius", moisture_unit = "dewpoint"):
 ## :type 		degrees: String
 ##
 ## :returns 	RSI: rounded relative strain index
-## :rtype 		RSI: Float or String ("NA": not applicable)
+## :rtype 		RSI: Float or String ("NaN": not a number)
 ##
 ## Source: GARÍN, A. de; BEJARÁN, R. Mortality rate and relative strain index in buenos airescity. International journal 
 ## of biometeorology, Springer, v. 48, n. 1, p. 31–36, 2003.
@@ -615,7 +615,7 @@ def relative_strain_index(T, pwvp, degrees = "celsius"):
   rsi = round(rsi, 6)
 
   if (degrees != "celsius" and degrees != "farenheit"):
-    rsi = "NA"
+    rsi = "NaN"
     print("Invalid degrees. For degrees, choose either 'farenheit' or 'celsius'")
                                 
   return rsi
