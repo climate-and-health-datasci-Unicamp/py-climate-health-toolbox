@@ -621,3 +621,49 @@ def relative_strain_index(T, pwvp, degrees = "celsius"):
   return rsi
 
 #-------------------------------------------------------------------------------------------------------------------------#
+## Function to compute the indoors wet bulb globe temperature based on the air temperature, on the relative humidity 
+## and on the wind speed of a certain environment.
+##
+## ATTENTION: This function just computes the wet bulb globe temperature for celsius unit. If the farenheit unit is
+## chosen, the function will automatically convert the input value and return the saturated vapor pressure based on
+## the converted value.
+##
+## :param 		T: air temperature (in the chosen degree unit)
+## :type 		T: Float
+## :param 		rh: relative humidity (in %)
+## :type 		rh: Float
+## :param 		v: wind speed (in m/s)
+## :type 		v: Float
+##
+## :returns 		wbgt: wet bulb globe temperature indoors
+## :rtype 		wbgt: Float or String ("NA": not applicable)
+##
+## Source: 
+##
+
+def wet_bulb_globe_temperature(T, rh, v, degrees = 'celsius'):
+  if degrees == 'farenheit':
+    T = farenheit_to_celsius(T)
+
+  h = 685 #altitude de Campinas
+  # https://www.math24.net/barometric-formula#:~:text=P(h)%3DP0,exp(%E2%88%920.00012H).
+  P = 101.325*np.exp(-(0.02896*9.807)*h/(8.3143*288.15))
+  Gama = 0.000665*P
+  avp = act_vap_pressure(T,rh)
+  Td = [240.97*np.log((i/1000)/0.611)/(17.502-np.log((i/1000)/0.611)) for i in avp]
+  Tw = 0
+
+  # iteration to determine the Tw
+  for i in range(100):
+    average = (Td[0]+Tw)/2
+    es_avg = 0.611*np.exp(17.502*average/(average+240.97))
+    Delta = 17.502*240.97*es_avg/((240.97+average)**2)
+    Tw = (Gama*T+Delta*Td[0])/(Delta+Gama)
+
+  wbgt = 0.67*Tw + 0.33*T - 0.048*np.log10(v)*(T-Tw)
+
+  if (degrees != "celsius" and degrees != "farenheit"):
+    wbgt = "NA"
+    print("Invalid degrees. Choose either 'farenheit' or 'celsius'")
+
+  return wbgt
